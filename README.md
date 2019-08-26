@@ -17,3 +17,11 @@ database.ymlを
 ```
 
 に変更する
+
+## コマンドの実行
+
+```
+$ docker-compose exec [container_name] [command]
+```
+例) serverコンテナでls -alを実行する
+``` $ docker-compose exec server ls -al ```
