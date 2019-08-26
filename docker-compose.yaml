@@ -1,0 +1,57 @@
+version: '3'
+
+volumes:
+  bundle:
+
+services:
+  # バックエンド
+  server:
+    container_name: server
+    build: ./docker/api
+    command: bundle exec rails s -p 3000 -b 0.0.0.0
+    volumes:
+      - ./server:/app
+      - bundle:/user/local
+    environment:
+      TZ: Asia/Tokyo
+      RAILS_ENV: development
+    ports:
+     - 3000:3000
+    depends_on:
+      - db
+    links:
+      - db
+    tty: true
+    stdin_open: true
+
+  db:
+    container_name: mysql
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: docker
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db:/var/lib/mysql
+  
+  # フロントエンド
+  web:
+    container_name: web
+    build: ./docker/node
+    command: yarn start
+    volumes:
+      - ./web:/app
+    ports:
+      - 8000:3000
+
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports: 
+      - 80:80
+    volumes: 
+      - ./web/build:/var/www
+      - ./docker/nginx/:/etc/nginx/conf.d/
+    depends_on: 
+      - web
+    working_dir: /web/blog
